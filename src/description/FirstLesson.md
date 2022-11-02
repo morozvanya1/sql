@@ -120,4 +120,58 @@ select title, author, amount,
 from book where amount not in (select max(amount) from book);
 
 ## Запросы корректировки данных
-### 
+### Создание пустой таблицы
+create table supply(
+    supply_id INT PRIMARY KEY AUTO_INCREMENT, 
+    title VARCHAR(50),
+    author varchar(30),
+    price DECIMAL(8, 2),
+    amount int
+);
+
+### Добавление записей в таблицу
+insert into supply values ("1","Лирика","Пастернак Б.Л.","518.99","2"),
+("2","Черный человек","Есенин С.А.","570.20","6"),
+("3","Белая гвардия","Булгаков М.А.","540.50","7"),
+("4","Идиот","Достоевский Ф.М.","360.80","3");
+
+### Добавление записей из другой таблицы
+insert into book (title, author, price, amount)
+select title, author, price, amount from supply 
+where author not in ('Булгаков М.А.', 'Достоевский Ф.М.');
+
+### Добавление записей, вложенные запросы
+insert into book (title, author, price, amount)
+select title, author, price, amount from supply 
+where author not in (select author from book);
+
+### Запросы на обновление
+update book set price = price - price * 0.1
+where amount between 5 and 10;
+
+### Запросы на обновление нескольких столбцов
+update book set buy = IF(buy > amount, amount, buy),
+price = IF(buy = 0, price - price * 0.1, price);
+
+### Запросы на обновление нескольких таблиц 
+update book, supply
+set book.amount = book.amount + supply.amount, 
+book.price = (book.price + supply.price) / 2
+where supply.title = book.title;
+
+### Запросы на удаление
+delete from supply where author in (select author from book group by author having sum(amount) > 10);
+
+### Запросы на создание таблицы
+CREATE TABLE ordering AS
+select author, title,
+(select avg(amount) from book) as amount
+from book where amount < (select avg(amount) from book);
+
+## Таблица "Командировки", запросы на выборку
+### Задание 1
+select name, city, per_diem, date_first, date_last
+from trip where name like '%а %'
+order by date_last desc;
+
+### Задание 2
