@@ -59,5 +59,65 @@ select title, author from book
 where title like '%_ _%' and author like '%С.%'
 order by title;
 
+## Запросы, групповые операции
+### Выбор уникальных элементов столбца
+select distinct amount from book;
 
+### Выборка данных, групповые функции SUM и COUNT
+select author as 'Автор', count(author) as 'Различных_книг', sum(amount) as 'Количество_экземпляров'
+from book group by author;
 
+### Выборка данных, групповые функции MIN, MAX и AVG
+select author, min(price) as 'Минимальная_цена', max(price) as 'Максимальная_цена', 
+avg(price) as 'Средняя_цена' from book group by author;
+
+### Выборка данных c вычислением, групповые функции
+select author, sum(price * amount) as 'Стоимость',
+ROUND((sum(price * amount) * 0.18 / (1 + 0.18)), 2) as 'НДС',
+ROUND((sum(price * amount) / (1 + 0.18)), 2) as 'Стоимость_без_НДС'
+from book group by author;
+
+### Вычисления по таблице целиком
+select ROUND(min(price), 2) as 'Минимальная_цена', 
+ROUND(max(price), 2) as 'Максимальная_цена',
+ROUND(avg(price), 2) as 'Средняя_цена' from book;
+
+### Выборка данных по условию, групповые функции
+select ROUND(avg(price), 2) as 'Средняя_цена', 
+ROUND(sum(price * amount), 2) as 'Стоимость'
+from book where amount between 5 and 14;
+
+### Выборка данных по условию, групповые функции, WHERE и HAVING
+select author, ROUND(sum(price * amount), 2) as 'Стоимость'
+from book where title not in ('Идиот', 'Белая гвардия')
+group by author having sum(price * amount) > 5000
+order by sum(price * amount) desc;
+
+## Вложенные запросы
+### Вложенный запрос, возвращающий одно значение
+select author, title, price from book
+where price <= (select avg(price) from book)
+order by price desc;
+
+### Использование вложенного запроса в выражении
+select author, title, price from book 
+where price <= (select min(price) + 150 from book)
+order by price;
+
+### Вложенный запрос, оператор IN
+select author, title, amount from book
+where amount in (
+    select amount from book group by amount having count(amount) = 1
+);
+
+### Вложенный запрос, операторы ANY и ALL
+select author, title, price from book
+where price < ALL(select max(price) from book group by author);
+
+### Вложенный запрос после SELECT
+select title, author, amount,
+((select max(amount) from book) - amount) as 'Заказ'
+from book where amount not in (select max(amount) from book);
+
+## Запросы корректировки данных
+### 
