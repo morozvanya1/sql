@@ -215,4 +215,30 @@ from trip group by name having count(name) > 3
 order by sum(per_diem * (DATEDIFF(date_last, date_first) + 1)) desc;
 
 ## Таблица "Нарушения ПДД", запросы корректировки
-### 
+### Задание 1
+create table fine(
+    fine_id INT PRIMARY KEY AUTO_INCREMENT, 
+    name VARCHAR(30),
+    number_plate varchar(6),
+    violation varchar(50),
+    sum_fine DECIMAL(8, 2),
+    date_violation date,
+    date_payment date
+);
+
+### Задание 2
+insert into fine (name, number_plate, violation, sum_fine, date_violation, date_payment)
+values ('Баранов П.Е.', 'Р523ВТ', 'Превышение скорости(от 40 до 60)', null, '2020-02-14', null),
+('Абрамова К.А.', 'О111АВ', 'Проезд на запрещающий сигнал', null, '2020-02-23', null),
+('Яковлев Г.Р.', 'Т330ТТ', 'Проезд на запрещающий сигнал', null, '2020-03-03', null);
+
+### Использование временного имени таблицы (алиаса)
+update fine, traffic_violation set fine.sum_fine = traffic_violation.sum_fine
+where fine.sum_fine is null and fine.violation = traffic_violation.violation;
+
+### Группировка данных по нескольким столбцам
+select name, number_plate, violation
+from fine group by name, number_plate, violation having count(violation) > 1
+order by name, number_plate, violation;
+
+### Задание 3
