@@ -175,3 +175,44 @@ from trip where name like '%а %'
 order by date_last desc;
 
 ### Задание 2
+select distinct name from trip where city = 'Москва' order by name;
+
+### Задание 3
+select city, count(city) as 'Количество' from trip
+group by city order by city;
+
+### Оператор LIMIT
+select city, count(city) as 'Количество' from trip
+group by city order by count(city) desc limit 2;
+
+### Задание 4
+select name, city, DATEDIFF(date_last, date_first) + 1 as 'Длительность' from trip
+where city not in ('Москва', 'Санкт-Петербург') order by DATEDIFF(date_last, date_first) desc,
+city desc;
+
+### Задание 5
+select name, city, date_first, date_last from trip
+where DATEDIFF(date_last, date_first) in (select min(DATEDIFF(date_last, date_first)) from trip);
+
+### Задание 6
+select name, city, date_first, date_last from trip
+where MONTH(date_first) = MONTH(date_last)
+order by city, name;
+
+### Задание 7
+select MONTHNAME(date_first) as 'Месяц', count(date_first) as 'Количество'
+from trip group by MONTHNAME(date_first)
+order by count(date_first) desc, MONTHNAME(date_first);
+
+### Задание 8
+select name, city, date_first, per_diem * (DATEDIFF(date_last, date_first) + 1) as 'Сумма'
+from trip where MONTH(date_first) in (2,3) and YEAR(date_first) = 2020
+order by name, per_diem * DATEDIFF(date_last, date_first) desc;
+
+### Задание 9
+select name, sum(per_diem * (DATEDIFF(date_last, date_first) + 1)) as 'Сумма'
+from trip group by name having count(name) > 3
+order by sum(per_diem * (DATEDIFF(date_last, date_first) + 1)) desc;
+
+## Таблица "Нарушения ПДД", запросы корректировки
+### 
