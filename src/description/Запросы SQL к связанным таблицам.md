@@ -44,3 +44,11 @@ values ('Стихотворения и поэмы', 3, 2, '650.00', 15),
 ('Лирика', 4, 2, '518.99', 2);
 
 ## Запросы на выборку, соединение таблиц
+### Соединение INNER JOIN
+SELECT title, name_genre, price
+FROM 
+    book INNER JOIN genre
+    ON book.genre_id = genre.genre_id
+where book.amount > 8 order by price desc;
+
+### Внешнее соединение LEFT и RIGHT OUTER JOIN
