@@ -242,3 +242,24 @@ from fine group by name, number_plate, violation having count(violation) > 1
 order by name, number_plate, violation;
 
 ### Задание 3
+update fine,
+(select name, number_plate, violation from fine group by name, number_plate, violation having count(violation) > 1)
+fine_before
+set fine.sum_fine = fine.sum_fine * 2 
+where fine.date_payment is null and fine.name = fine_before.name;
+
+### Задание 4
+UPDATE fine, payment
+SET fine.date_payment = payment.date_payment,
+    fine.sum_fine = IF(DATEDIFF(payment.date_payment, payment.date_violation) <= 20, fine.sum_fine / 2, fine.sum_fine) 
+WHERE fine.date_payment is null and fine.name = payment.name and fine.number_plate = payment.number_plate and
+    fine.violation = payment.violation;
+
+### Задание 5
+CREATE TABLE back_payment AS
+select name, number_plate, violation, sum_fine, date_violation
+from fine where date_payment is null;
+
+### Задание 6
+delete from fine where date_violation < '2020-02-01';
+
