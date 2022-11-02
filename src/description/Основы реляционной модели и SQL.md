@@ -262,4 +262,3 @@ from fine where date_payment is null;
 
 ### Задание 6
 delete from fine where date_violation < '2020-02-01';
-
