@@ -292,4 +292,48 @@ select title, sum(Количество) as Количество, sum(Сумма)
 group by title order by Сумма desc;
 
 ## База данных «Интернет-магазин книг», запросы корректировки
-### 
+### Задание 1
+insert into client (name_client, city_id, email)
+values ('Попов Илья', 1, 'popov@test');
+
+### Задание 2
+insert into buy (buy_description, client_id)
+select 'Связаться со мной по вопросу доставки', client_id from client where name_client = 'Попов Илья';
+
+### Задание 3
+insert into buy_book (buy_id, book_id, amount)
+select 5, book_id, 2 from book where title = 'Лирика';
+
+insert into buy_book (buy_id, book_id, amount)
+select 5, book_id, 1 from book where title = 'Белая гвардия';
+
+### Задание 4
+update book join buy_book using (book_id)
+set book.amount = book.amount - buy_book.amount
+where buy_book.buy_id = 5;
+
+### Задание 5
+create table buy_pay
+select title, name_author, price, buy_book.amount as amount, sum(price * buy_book.amount) as Стоимость
+from book join buy_book using (book_id)
+join author using (author_id)
+where buy_book.buy_id = 5
+group by book.title, author.name_author, price, buy_book.amount
+order by title;
+
+### Задание 6
+create table buy_pay
+select buy_book.buy_id, sum(buy_book.amount) as Количество, sum(price * buy_book.amount) as Итого
+from book join buy_book using (book_id)
+join author using (author_id)
+where buy_book.buy_id = 5
+group by buy_book.buy_id;
+
+### Задание 7
+insert into buy_step (buy_id, step_id, date_step_beg, date_step_end) 
+select 5, step_id, null, null from step;
+
+### Задание 8
+update buy_step set date_step_end = '2020-04-13' where buy_id = 5 and step_id = 1;
+update buy_step set date_step_beg = '2020-04-13' where buy_id = 5 and step_id = 2;
+
