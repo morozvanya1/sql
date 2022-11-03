@@ -153,3 +153,74 @@ HAVING COUNT(name_program) = 2
 ORDER BY name_program ASC;
 
 ### Задание 10
+select name_program, name_enrollee, sum(result) as itog
+from enrollee
+join program_enrollee using (enrollee_id)
+join program using (program_id)
+join program_subject using (program_id)
+join enrollee_subject using (subject_id,enrollee_id)
+group by name_program, name_enrollee
+order by name_program, itog desc;
+
+### Задание 11
+select name_program, name_enrollee
+from enrollee
+join program_enrollee using (enrollee_id)
+join program using (program_id)
+join program_subject using (program_id)
+join enrollee_subject using (subject_id,enrollee_id)
+where result < min_result
+group by name_program, name_enrollee
+order by name_program, name_enrollee;
+
+## База данных «Абитуриент», запросы корректировки
+### Задание 1
+CREATE TABLE applicant
+SELECT program_id, enrollee.enrollee_id, SUM(result) AS itog
+FROM enrollee
+     JOIN program_enrollee USING(enrollee_id)
+     JOIN program USING(program_id)
+     JOIN program_subject USING(program_id)
+     JOIN subject USING(subject_id)
+     JOIN enrollee_subject USING(enrollee_id, subject_id)
+WHERE enrollee_subject.enrollee_id = enrollee.enrollee_id
+GROUP BY program_id, enrollee_id
+ORDER BY program_id, itog DESC;
+
+### Задание 2
+delete from applicant USING applicant
+inner join program_subject using(program_id)
+inner join enrollee_subject using(subject_id,enrollee_id)
+WHERE result < min_result;
+ 
+### Задание 3
+UPDATE applicant JOIN (
+    SELECT enrollee_id, IFNULL(SUM(bonus), 0) AS Бонус FROM enrollee_achievement
+    LEFT JOIN achievement USING(achievement_id)
+    GROUP BY enrollee_id 
+    ) AS t USING(enrollee_id)
+SET itog = itog + Бонус;
+
+### Задание 4
+create table applicant_order 
+select * from applicant order by program_id, itog desc;
+DROP TABLE applicant;
+
+### Зачисление студентов
+ALTER TABLE applicant_order ADD str_id INT FIRST;
+
+### Нумерация строк
+SET @row_num := 1;
+SET @num_pr := 0;
+
+UPDATE applicant_order
+    SET str_id = IF(program_id = @num_pr, @row_num := @row_num + 1, @row_num := 1 AND @num_pr := @num_pr + 1);
+    
+### Задание 5
+create table student as
+select program.name_program, enrollee.name_enrollee, applicant_order.itog 
+from applicant_order
+join program using (program_id)
+join enrollee using (enrollee_id)
+where applicant_order.str_id <= program.plan
+order by 1, 3 desc;
